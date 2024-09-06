@@ -1,20 +1,34 @@
 ---
-- name: Install nginx
+- name: Install and configure Nginx on Ubuntu servers
   hosts: web
-  become: true
-
+  become: yes
   tasks:
-  - name: Add epel-release repo
-    yum:
-      name: epel-release
-      state: present
+    - name: Update apt cache
+      apt:
+        update_cache: yes
 
-  - name: Install nginx
-    yum:
-      name: nginx
-      state: present
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
 
-  - name: Start NGiNX
-    service:
-      name: nginx
+    - name: Start and enable Nginx service
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Ensure firewall allows HTTP traffic
+      ufw:
+        rule: allow
+        name: "Nginx HTTP"
+
+
+
+  handlers:
+    - name: Restart Nginx
+      systemd:
+        name: nginx
+        state: restarted
+
       state: started
